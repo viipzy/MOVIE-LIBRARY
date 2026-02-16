@@ -133,6 +133,10 @@ body {
   transform: translateX(24px);
 }
 
+a {
+  text-decoration: none;
+}
+
 #movieSections {
   padding-top: 100px;
   min-height: 100vh;
@@ -152,7 +156,7 @@ body {
   display: flex;
   gap: 18px;
   overflow-x: auto;
-  padding: 30px 0;
+  padding: 30px;
   scroll-behavior: smooth;
 }
 .section-row .row-container::-webkit-scrollbar {

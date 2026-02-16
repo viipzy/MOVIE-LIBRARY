@@ -1,12 +1,6 @@
-/**
- * 🎬 CineLibrary Pro: OOP Implementation
- * Features: Private Fields, Inheritance, Polymorphism, and API Integration
- */
-
-// --- 1. THE DATA MODELS (Inheritance) ---
 
 class Movie {
-  #userRatings = []; // Private field: Encapsulation
+  #userRatings = []; 
 
   constructor(data) {
     this.title = data.Title;
@@ -19,7 +13,7 @@ class Movie {
     this.imdb = data.imdbRating;
     this.genre = data.Genre;
 
-    // Simulating a private rating addition
+    
     this.addRating(Math.floor(Math.random() * 3) + 7);
   }
 
@@ -33,7 +27,7 @@ class Movie {
     ).toFixed(1);
   }
 
-  // Base Polymorphic Method
+  
   render() {
     return `
             <div class="movie-card">
@@ -49,7 +43,7 @@ class Movie {
   }
 }
 
-// Inheritance: Specialized Action Class
+
 class ActionMovie extends Movie {
   render() {
     return super
@@ -59,7 +53,7 @@ class ActionMovie extends Movie {
   }
 }
 
-// Inheritance: Specialized Comedy Class
+
 class ComedyMovie extends Movie {
   render() {
     return super
@@ -69,7 +63,7 @@ class ComedyMovie extends Movie {
   }
 }
 
-// --- 2. THE UI COMPONENTS (Composition) ---
+
 
 class CategorySection {
   constructor(title, movieTitles) {
@@ -94,7 +88,7 @@ class CategorySection {
       .getElementById("movieSections")
       .insertAdjacentHTML("beforeend", html);
 
-    // Setup Scroll Logic
+
     const container = document.getElementById(rowId);
     document.getElementById(`btn-l-${rowId}`).onclick = () =>
       container.scrollBy({ left: -500, behavior: "smooth" });
@@ -112,7 +106,7 @@ class CategorySection {
   }
 }
 
-// --- 3. THE MAIN APP CONTROLLER ---
+
 
 class MovieApp {
   constructor(apiKey) {
@@ -127,7 +121,6 @@ class MovieApp {
       const data = await response.json();
 
       if (data.Response === "True") {
-        // Polymorphism in action: Factory logic to pick class
         if (data.Genre.includes("Action")) return new ActionMovie(data);
         if (data.Genre.includes("Comedy")) return new ComedyMovie(data);
         return new Movie(data);
@@ -143,13 +136,13 @@ class MovieApp {
     const searchBtn = document.getElementById("searchBtn");
     const searchInput = document.getElementById("movieInput");
 
-    // Theme Toggle Logic
+
     themeCheckbox.addEventListener("change", () => {
       const theme = themeCheckbox.checked ? "dark" : "light";
       document.documentElement.setAttribute("data-theme", theme);
     });
 
-    // Search Logic
+
     const performSearch = async () => {
       const query = searchInput.value.trim();
       if (!query) return;
@@ -168,7 +161,7 @@ class MovieApp {
       if (e.key === "Enter") performSearch();
     };
 
-    // Default Categories
+  
     const categories = [
       new CategorySection("Trending Blockbusters", [
         "Inception",
@@ -201,7 +194,6 @@ class MovieApp {
   }
 }
 
-// 🎬 INITIALIZE APP
-// Get your API Key at http://www.omdbapi.com/
+
 const MY_API_KEY = "398a29f2";
 const cineLib = new MovieApp(MY_API_KEY);

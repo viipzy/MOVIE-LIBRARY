@@ -217,3 +217,6 @@ class Modal {
 
 
 const cineLib = new MovieApp();
+
+
+

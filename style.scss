@@ -459,7 +459,7 @@ a{
     }
   }
 
-  /
+  
   #movieSections {
     padding-top: 140px; 
   }
@@ -473,6 +473,8 @@ a{
 @media (max-width: 480px) {
   .movie-card {
     flex: 0 0 160px; 
+    height: 120px;
+    img { height: 100%; }
   }
   
   .skeleton-card {

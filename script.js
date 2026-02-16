@@ -135,7 +135,7 @@ class MovieApp {
     const favs = JSON.parse(localStorage.getItem("myList")) || [];
     const categories = [
       new CategorySection("My List", favs, true),
-      new CategorySection("2024/25 Blockbusters", [
+      new CategorySection("Blockbusters", [
         "Dune: Part Two",
         "Deadpool & Wolverine",
         "Oppenheimer",
@@ -178,4 +178,42 @@ class MovieApp {
     this.loadContent();
   }
 }
+
+class Modal {
+    static open(movie) {
+        const trailerUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(movie.title + ' official trailer')}`;
+        
+        const html = `
+            <div class="modal-overlay" id="modalOverlay" onclick="Modal.close()">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <button class="close-modal" onclick="Modal.close()">✕</button>
+                    <div class="video-container">
+                        <iframe src="${trailerUrl}" allowfullscreen></iframe>
+                    </div>
+                    <div class="details-pane">
+                        <h2>${movie.title}</h2>
+                        <div class="stats">⭐ IMDB: ${movie.imdb} | ${movie.year} | ${movie.genre}</div>
+                        <p>${movie.plot}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', html);
+        setTimeout(() => document.getElementById('modalOverlay').classList.add('active'), 10);
+        
+       
+        document.onkeydown = (e) => { if (e.key === "Escape") Modal.close(); };
+    }
+
+    static close() {
+        const modal = document.getElementById('modalOverlay');
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    }
+}
+
+
 const cineLib = new MovieApp();

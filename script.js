@@ -1,12 +1,12 @@
 /**
- * 🎬 CineLibrary: OOP Movie Management System
- * Concepts: Classes, Inheritance, Private Fields, and Polymorphism
+ * 🎬 CineLibrary Pro: OOP Implementation
+ * Features: Private Fields, Inheritance, Polymorphism, and API Integration
  */
 
 // --- 1. THE DATA MODELS (Inheritance) ---
 
 class Movie {
-  #userRatings = []; // Private field for ratings
+  #userRatings = []; // Private field: Encapsulation
 
   constructor(data) {
     this.title = data.Title;
@@ -14,12 +14,12 @@ class Movie {
     this.poster =
       data.Poster !== "N/A"
         ? data.Poster
-        : "https://via.placeholder.com/200x300?text=No+Poster";
+        : "https://via.placeholder.com/400x600?text=No+Poster";
     this.plot = data.Plot;
+    this.imdb = data.imdbRating;
     this.genre = data.Genre;
-    this.imdbRating = data.imdbRating;
 
-    // Add a default random rating to the private field for the OOP demo
+    // Simulating a private rating addition
     this.addRating(Math.floor(Math.random() * 3) + 7);
   }
 
@@ -28,24 +28,21 @@ class Movie {
   }
 
   getAverageRating() {
-    if (this.#userRatings.length === 0) return "N/A";
-    const sum = this.#userRatings.reduce((a, b) => a + b, 0);
-    return (sum / this.#userRatings.length).toFixed(1);
+    return (
+      this.#userRatings.reduce((a, b) => a + b, 0) / this.#userRatings.length
+    ).toFixed(1);
   }
 
-  // Base rendering method
+  // Base Polymorphic Method
   render() {
     return `
             <div class="movie-card">
-                <img src="${this.poster}" alt="${this.title}">
+                <img src="${this.poster}" alt="${this.title}" loading="lazy">
                 <div class="info">
+                    <span class="meta">⭐ ${this.imdb} | ${this.year}</span>
                     <h3>${this.title}</h3>
-                    <div class="meta">
-                        <span class="score">⭐ ${this.imdbRating}</span>
-                        <span class="year">${this.year}</span>
-                    </div>
-                    <p class="plot-snippet">${this.plot.substring(0, 60)}...</p>
-                    <div class="user-avg">Community: ${this.getAverageRating()}</div>
+                    <p class="plot">${this.plot.substring(0, 100)}...</p>
+                    <div class="user-avg">Community Score: ${this.getAverageRating()}</div>
                 </div>
             </div>
         `;
@@ -55,7 +52,6 @@ class Movie {
 // Inheritance: Specialized Action Class
 class ActionMovie extends Movie {
   render() {
-    // Polymorphism: Adding a unique class and a "High Octane" badge
     return super
       .render()
       .replace("movie-card", "movie-card action")
@@ -66,7 +62,6 @@ class ActionMovie extends Movie {
 // Inheritance: Specialized Comedy Class
 class ComedyMovie extends Movie {
   render() {
-    // Polymorphism: Adding a unique class and a "Laugh" badge
     return super
       .render()
       .replace("movie-card", "movie-card comedy")
@@ -82,54 +77,57 @@ class CategorySection {
     this.movieTitles = movieTitles;
   }
 
-  async render(libraryInstance) {
-    const sectionId = `row-${this.title.replace(/\s+/g, "")}`;
+  async render(library) {
+    const rowId = `row-${this.title.replace(/\s+/g, "")}`;
     const html = `
             <section class="section-row">
                 <h2>${this.title}</h2>
-                <div class="row-container" id="${sectionId}">
-                    <div class="loader">Loading...</div>
+                <button class="nav-btn left" id="btn-l-${rowId}">‹</button>
+                <div class="row-container" id="${rowId}">
+                    <div class="loader">✨ Loading...</div>
                 </div>
+                <button class="nav-btn right" id="btn-r-${rowId}">›</button>
             </section>
         `;
 
     document
       .getElementById("movieSections")
       .insertAdjacentHTML("beforeend", html);
-    const container = document.getElementById(sectionId);
 
-    // Fetch all movies for this row
-    const movieObjects = await Promise.all(
-      this.movieTitles.map((t) => libraryInstance.fetchMovieData(t)),
-    );
+    // Setup Scroll Logic
+    const container = document.getElementById(rowId);
+    document.getElementById(`btn-l-${rowId}`).onclick = () =>
+      container.scrollBy({ left: -500, behavior: "smooth" });
+    document.getElementById(`btn-r-${rowId}`).onclick = () =>
+      container.scrollBy({ left: 500, behavior: "smooth" });
+
+    // Fetch and map to OOP Objects
+    const moviePromises = this.movieTitles.map((t) => library.fetchData(t));
+    const movieObjects = await Promise.all(moviePromises);
 
     container.innerHTML = ""; // Clear loader
-    movieObjects.forEach((movie) => {
-      if (movie) container.innerHTML += movie.render();
+    movieObjects.forEach((obj) => {
+      if (obj) container.innerHTML += obj.render();
     });
   }
 }
 
 // --- 3. THE MAIN APP CONTROLLER ---
 
-class MovieLibrary {
+class MovieApp {
   constructor(apiKey) {
     this.apiKey = apiKey;
-    this.sectionContainer = document.getElementById("movieSections");
-    this.searchInput = document.getElementById("movieInput");
-    this.searchBtn = document.getElementById("searchBtn");
-
     this.init();
   }
 
-  async fetchMovieData(title) {
+  async fetchData(title) {
     try {
       const url = `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${this.apiKey}`;
       const response = await fetch(url);
       const data = await response.json();
 
       if (data.Response === "True") {
-        // Determine which class to instantiate (Factory Logic)
+        // Polymorphism in action: Factory logic to pick class
         if (data.Genre.includes("Action")) return new ActionMovie(data);
         if (data.Genre.includes("Comedy")) return new ComedyMovie(data);
         return new Movie(data);
@@ -140,63 +138,70 @@ class MovieLibrary {
     return null;
   }
 
-  async handleSearch() {
-    const query = this.searchInput.value.trim();
-    if (!query) return;
+  init() {
+    const themeCheckbox = document.getElementById("themeCheckbox");
+    const searchBtn = document.getElementById("searchBtn");
+    const searchInput = document.getElementById("movieInput");
 
-    this.sectionContainer.innerHTML = ""; // Clear the grid for search results
-    const searchSection = new CategorySection("Search Results", [query]);
-    await searchSection.render(this);
-
-    // Add a "Back" button to restore defaults
-    this.sectionContainer.insertAdjacentHTML(
-      "afterbegin",
-      `<button onclick="location.reload()" class="back-btn">← Back to Library</button>`,
-    );
-  }
-
-  async init() {
-    // 1. Setup Event Listeners
-    this.searchBtn.addEventListener("click", () => this.handleSearch());
-    this.searchInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.handleSearch();
+    // Theme Toggle Logic
+    themeCheckbox.addEventListener("change", () => {
+      const theme = themeCheckbox.checked ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", theme);
     });
 
-    // 2. Define Netflix-style Categories
+    // Search Logic
+    const performSearch = async () => {
+      const query = searchInput.value.trim();
+      if (!query) return;
+
+      document.getElementById("movieSections").innerHTML = `
+                <div style="padding: 20px 5%;">
+                    <button onclick="location.reload()" style="background:none; border:1px solid var(--accent); color:var(--accent); padding:10px 20px; border-radius:30px; cursor:pointer;">← Back to Library</button>
+                </div>
+            `;
+      const searchRow = new CategorySection("Search Result", [query]);
+      await searchRow.render(this);
+    };
+
+    searchBtn.onclick = performSearch;
+    searchInput.onkeypress = (e) => {
+      if (e.key === "Enter") performSearch();
+    };
+
+    // Default Categories
     const categories = [
-      new CategorySection("Trending Now", [
+      new CategorySection("Trending Blockbusters", [
         "Inception",
         "The Dark Knight",
+        "Dune",
         "Interstellar",
-        "The Prestige",
+        "The Matrix",
+        "Avatar",
+        "Tenet",
       ]),
       new CategorySection("Action Adrenaline", [
         "John Wick",
+        "Gladiator",
         "Mad Max: Fury Road",
         "Die Hard",
-        "Gladiator",
+        "Top Gun: Maverick",
+        "Extraction",
       ]),
-      new CategorySection("Comedy Hits", [
+      new CategorySection("Comedy Gold", [
         "Superbad",
         "The Hangover",
-        "Mean Girls",
+        "Deadpool",
+        "Free Guy",
         "Step Brothers",
-      ]),
-      new CategorySection("Drama & Adventure", [
-        "The Shawshank Redemption",
-        "Life of Pi",
-        "The Revenant",
-        "Dune",
+        "21 Jump Street",
       ]),
     ];
 
-    // 3. Render all rows
-    for (const cat of categories) {
-      await cat.render(this);
-    }
+    categories.forEach((cat) => cat.render(this));
   }
 }
 
-// --- 4. START THE APP ---
-const API_KEY = "398a29f2"; // 👈 Replace with your real OMDb API key
-const myApp = new MovieLibrary(API_KEY);
+// 🎬 INITIALIZE APP
+// Get your API Key at http://www.omdbapi.com/
+const MY_API_KEY = "398a29f2";
+const cineLib = new MovieApp(MY_API_KEY);

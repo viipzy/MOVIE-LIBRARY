@@ -3,25 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineLibrary OOP</title>
+    <title>VipzyLibrary | OOP Cinema</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo">🎬 Cine<span>Library</span></div>
+    <nav class="glass-nav">
+        <div class="logo">VIPZY<span>LIB</span></div>
         
-        <div class="nav-controls">
-            <div class="search-box">
-                <input type="text" id="movieInput" placeholder="Search movies...">
-                <button id="searchBtn">Search</button>
+        <div class="nav-right">
+            <div class="search-container">
+                <input type="text" id="movieInput" placeholder="Explore movies...">
+                <button id="searchBtn" aria-label="Search">🔍</button>
             </div>
-            <button id="themeToggle" class="theme-btn">🌙 Night Mode</button>
+
+            <div class="toggle-wrapper">
+                <span class="mode-icon"></span>
+                <label class="switch">
+                    <input type="checkbox" id="themeCheckbox" checked>
+                    <span class="slider"></span>
+                </label>
+                <span class="mode-icon"></span>
+            </div>
         </div>
     </nav>
 
     <main id="movieSections">
         </main>
+
+    <div class="fab-container">
+        <button class="fab" id="supportBtn">
+            <span class="fab-icon">💬</span>
+            <span class="fab-text">Support</span>
+        </button>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; 2026 VipzyLibrary. Powered by OMDb API.</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>

@@ -471,11 +471,7 @@ a {
 }
 @media (max-width: 480px) {
   .movie-card {
-    flex: 0 0 160px;
-    height: 120px;
-  }
-  .movie-card img {
-    height: 100%;
+    flex: 0 0 300px;
   }
   .skeleton-card {
     flex: 0 0 160px;

@@ -197,3 +197,21 @@ class MovieApp {
 
 const MY_API_KEY = "";
 const cineLib = new MovieApp(MY_API_KEY);
+
+async fetchData(title) {
+    try {
+        
+        const url = `/api/fetchMovie?title=${encodeURIComponent(title)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.Response === "True") {
+            if (data.Genre.includes("Action")) return new ActionMovie(data);
+            if (data.Genre.includes("Comedy")) return new ComedyMovie(data);
+            return new Movie(data);
+        }
+    } catch (err) {
+        console.error("Internal API Error:", err);
+    }
+    return null;
+}

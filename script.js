@@ -1,6 +1,5 @@
 class Movie {
   #userRatings = [];
-
   constructor(data) {
     this.title = data.Title;
     this.year = data.Year;
@@ -13,28 +12,23 @@ class Movie {
     this.genre = data.Genre;
     this.addRating(Math.floor(Math.random() * 3) + 7);
   }
-
   addRating(score) {
     if (score >= 1 && score <= 10) this.#userRatings.push(score);
   }
-
   getAverageRating() {
     return (
       this.#userRatings.reduce((a, b) => a + b, 0) / this.#userRatings.length
     ).toFixed(1);
   }
-
   static isFavorited(title) {
     const list = JSON.parse(localStorage.getItem("myList")) || [];
     return list.includes(title);
   }
-
   render() {
     const isFav = Movie.isFavorited(this.title);
     return `
             <div class="movie-card">
-                <button class="favorite-btn ${isFav ? "active" : ""}" 
-                        onclick="event.stopPropagation(); cineLib.toggleFav('${this.title.replace(/'/g, "\\'")}')">
+                <button class="favorite-btn ${isFav ? "active" : ""}" onclick="event.stopPropagation(); cineLib.toggleFav('${this.title.replace(/'/g, "\\'")}')">
                     ${isFav ? "❤️" : "🤍"}
                 </button>
                 <img src="${this.poster}" alt="${this.title}" loading="lazy">
@@ -74,21 +68,21 @@ class CategorySection {
     this.isFavSection = isFavSection;
   }
 
+  renderSkeletons() {
+    return Array(6).fill('<div class="skeleton-card"></div>').join("");
+  }
+
   async render(library) {
     if (this.isFavSection && this.movieTitles.length === 0) return;
-
     const rowId = `row-${this.title.replace(/\s+/g, "")}`;
     const html = `
             <section class="section-row" id="section-${rowId}">
                 <h2>${this.title}</h2>
                 <button class="nav-btn left" id="btn-l-${rowId}">‹</button>
-                <div class="row-container" id="${rowId}">
-                    <div class="loader">✨ Loading...</div>
-                </div>
+                <div class="row-container" id="${rowId}">${this.renderSkeletons()}</div>
                 <button class="nav-btn right" id="btn-r-${rowId}">›</button>
             </section>
         `;
-
     document
       .getElementById("movieSections")
       .insertAdjacentHTML(this.isFavSection ? "afterbegin" : "beforeend", html);
@@ -113,7 +107,6 @@ class MovieApp {
   constructor() {
     this.init();
   }
-
   async fetchData(title) {
     try {
       const url = `/api/fetchMovie?title=${encodeURIComponent(title)}`;
@@ -129,24 +122,17 @@ class MovieApp {
     }
     return null;
   }
-
   toggleFav(title) {
     let list = JSON.parse(localStorage.getItem("myList")) || [];
-    if (list.includes(title)) {
-      list = list.filter((t) => t !== title);
-    } else {
-      list.push(title);
-    }
+    list.includes(title)
+      ? (list = list.filter((t) => t !== title))
+      : list.push(title);
     localStorage.setItem("myList", JSON.stringify(list));
-
-    // Refresh view to update My List row and heart states
     document.getElementById("movieSections").innerHTML = "";
     this.loadContent();
   }
-
   loadContent() {
     const favs = JSON.parse(localStorage.getItem("myList")) || [];
-
     const categories = [
       new CategorySection("My List", favs, true),
       new CategorySection("2024/25 Blockbusters", [
@@ -173,30 +159,23 @@ class MovieApp {
         "Blade Runner 2049",
       ]),
     ];
-
     categories.forEach((cat) => cat.render(this));
   }
-
   init() {
-    const themeCheckbox = document.getElementById("themeCheckbox");
-    themeCheckbox.addEventListener("change", () => {
+    document.getElementById("themeCheckbox").addEventListener("change", (e) => {
       document.documentElement.setAttribute(
         "data-theme",
-        themeCheckbox.checked ? "dark" : "light",
+        e.target.checked ? "dark" : "light",
       );
     });
-
-    const performSearch = async () => {
+    document.getElementById("searchBtn").onclick = async () => {
       const query = document.getElementById("movieInput").value.trim();
       if (!query) return;
       document.getElementById("movieSections").innerHTML =
         `<div style="padding: 20px 5%;"><button onclick="location.reload()" class="back-btn">← Back</button></div>`;
       await new CategorySection("Search Results", [query]).render(this);
     };
-
-    document.getElementById("searchBtn").onclick = performSearch;
     this.loadContent();
   }
 }
-
 const cineLib = new MovieApp();

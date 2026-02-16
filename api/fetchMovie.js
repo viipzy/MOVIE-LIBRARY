@@ -1,5 +1,6 @@
 export default async function handler(req, res) {
   const { title } = req.query;
+ 
   const apiKey = process.env.OMDB_API_KEY;
 
   const url = `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${apiKey}`;

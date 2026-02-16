@@ -1,6 +1,7 @@
 
+
 class Movie {
-  #userRatings = []; 
+  #userRatings = [];
 
   constructor(data) {
     this.title = data.Title;
@@ -12,8 +13,6 @@ class Movie {
     this.plot = data.Plot;
     this.imdb = data.imdbRating;
     this.genre = data.Genre;
-
-    
     this.addRating(Math.floor(Math.random() * 3) + 7);
   }
 
@@ -27,7 +26,6 @@ class Movie {
     ).toFixed(1);
   }
 
-  
   render() {
     return `
             <div class="movie-card">
@@ -43,7 +41,6 @@ class Movie {
   }
 }
 
-
 class ActionMovie extends Movie {
   render() {
     return super
@@ -53,7 +50,6 @@ class ActionMovie extends Movie {
   }
 }
 
-
 class ComedyMovie extends Movie {
   render() {
     return super
@@ -62,8 +58,6 @@ class ComedyMovie extends Movie {
       .replace("</h3>", " <small>😂</small></h3>");
   }
 }
-
-
 
 class CategorySection {
   constructor(title, movieTitles) {
@@ -88,35 +82,30 @@ class CategorySection {
       .getElementById("movieSections")
       .insertAdjacentHTML("beforeend", html);
 
-
     const container = document.getElementById(rowId);
     document.getElementById(`btn-l-${rowId}`).onclick = () =>
       container.scrollBy({ left: -500, behavior: "smooth" });
     document.getElementById(`btn-r-${rowId}`).onclick = () =>
       container.scrollBy({ left: 500, behavior: "smooth" });
 
-
     const moviePromises = this.movieTitles.map((t) => library.fetchData(t));
     const movieObjects = await Promise.all(moviePromises);
 
-    container.innerHTML = ""; 
+    container.innerHTML = "";
     movieObjects.forEach((obj) => {
       if (obj) container.innerHTML += obj.render();
     });
   }
 }
 
-
-
 class MovieApp {
-  constructor(apiKey) {
-    this.apiKey = apiKey;
+  constructor() {
     this.init();
   }
 
   async fetchData(title) {
     try {
-      const url = `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${this.apiKey}`;
+      const url = `/api/fetchMovie?title=${encodeURIComponent(title)}`;
       const response = await fetch(url);
       const data = await response.json();
 
@@ -126,7 +115,7 @@ class MovieApp {
         return new Movie(data);
       }
     } catch (err) {
-      console.error("API Error:", err);
+      console.error(err);
     }
     return null;
   }
@@ -136,12 +125,10 @@ class MovieApp {
     const searchBtn = document.getElementById("searchBtn");
     const searchInput = document.getElementById("movieInput");
 
-
     themeCheckbox.addEventListener("change", () => {
       const theme = themeCheckbox.checked ? "dark" : "light";
       document.documentElement.setAttribute("data-theme", theme);
     });
-
 
     const performSearch = async () => {
       const query = searchInput.value.trim();
@@ -161,7 +148,6 @@ class MovieApp {
       if (e.key === "Enter") performSearch();
     };
 
-  
     const categories = [
       new CategorySection("Trending Blockbusters", [
         "Inception",
@@ -194,24 +180,4 @@ class MovieApp {
   }
 }
 
-
-const MY_API_KEY = "";
-const cineLib = new MovieApp(MY_API_KEY);
-
-async fetchData(title) {
-    try {
-        
-        const url = `/api/fetchMovie?title=${encodeURIComponent(title)}`;
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.Response === "True") {
-            if (data.Genre.includes("Action")) return new ActionMovie(data);
-            if (data.Genre.includes("Comedy")) return new ComedyMovie(data);
-            return new Movie(data);
-        }
-    } catch (err) {
-        console.error("Internal API Error:", err);
-    }
-    return null;
-}
+const cineLib = new MovieApp();

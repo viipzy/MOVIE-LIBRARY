@@ -1,157 +1,219 @@
-class Modal {
-  static open(movieData) {
-    const movie = JSON.parse(decodeURIComponent(movieData));
-    const trailerUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(movie.title + " official trailer")}`;
-    const html = `
-            <div class="modal-overlay" id="modalOverlay" onclick="Modal.close()">
-                <div class="modal-content" onclick="event.stopPropagation()">
-                    <iframe src="${trailerUrl}" allowfullscreen></iframe>
-                    <div class="details">
-                        <h2>${movie.title}</h2>
-                        <p style="color:var(--accent)">${movie.genre} | ${movie.year}</p>
-                        <p>${movie.plot}</p>
-                    </div>
-                </div>
-            </div>`;
-    document.body.insertAdjacentHTML("beforeend", html);
-    setTimeout(
-      () => document.getElementById("modalOverlay").classList.add("active"),
-      10,
-    );
-  }
-  static close() {
-    const m = document.getElementById("modalOverlay");
-    if (m) {
-      m.classList.remove("active");
-      setTimeout(() => m.remove(), 300);
-    }
-  }
-}
-
 class Movie {
+  #userRatings = [];
   constructor(data) {
     this.title = data.Title;
     this.year = data.Year;
     this.poster =
       data.Poster !== "N/A"
         ? data.Poster
-        : "https://via.placeholder.com/400x600";
+        : "https://via.placeholder.com/400x600?text=No+Poster";
     this.plot = data.Plot;
     this.imdb = data.imdbRating;
     this.genre = data.Genre;
+    this.addRating(Math.floor(Math.random() * 3) + 7);
   }
-  static isFav(title) {
-    return (JSON.parse(localStorage.getItem("myList")) || []).includes(title);
+  addRating(score) {
+    if (score >= 1 && score <= 10) this.#userRatings.push(score);
+  }
+  getAverageRating() {
+    return (
+      this.#userRatings.reduce((a, b) => a + b, 0) / this.#userRatings.length
+    ).toFixed(1);
+  }
+  static isFavorited(title) {
+    const list = JSON.parse(localStorage.getItem("myList")) || [];
+    return list.includes(title);
   }
   render() {
-    const isFav = Movie.isFav(this.title);
-    const movieJson = encodeURIComponent(JSON.stringify(this));
+    const isFav = Movie.isFavorited(this.title);
     return `
-            <div class="movie-card" onclick="Modal.open('${movieJson}')">
+            <div class="movie-card">
                 <button class="favorite-btn ${isFav ? "active" : ""}" onclick="event.stopPropagation(); cineLib.toggleFav('${this.title.replace(/'/g, "\\'")}')">
                     ${isFav ? "❤️" : "🤍"}
                 </button>
-                <img src="${this.poster}" alt="${this.title}">
+                <img src="${this.poster}" alt="${this.title}" loading="lazy">
                 <div class="info">
+                    <span class="meta">⭐ ${this.imdb} | ${this.year}</span>
                     <h3>${this.title}</h3>
-                    <p>⭐ ${this.imdb}</p>
+                    <p class="plot">${this.plot.substring(0, 100)}...</p>
+                    <div class="user-avg">Score: ${this.getAverageRating()}</div>
                 </div>
-            </div>`;
+            </div>
+        `;
   }
 }
 
 class ActionMovie extends Movie {
   render() {
-    return super.render().replace("movie-card", "movie-card action");
+    return super
+      .render()
+      .replace("movie-card", "movie-card action")
+      .replace("</h3>", " <small>🔥</small></h3>");
   }
 }
+
 class SciFiMovie extends Movie {
   render() {
-    return super.render().replace("movie-card", "movie-card sci-fi");
+    return super
+      .render()
+      .replace("movie-card", "movie-card sci-fi")
+      .replace("</h3>", " <small>🚀</small></h3>");
   }
 }
 
 class CategorySection {
-  constructor(title, titles, isFav = false) {
+  constructor(title, movieTitles, isFavSection = false) {
     this.title = title;
-    this.titles = titles;
-    this.isFav = isFav;
+    this.movieTitles = movieTitles;
+    this.isFavSection = isFavSection;
   }
-  async render(app) {
-    if (this.isFav && this.titles.length === 0) return;
-    const id = `row-${this.title.replace(/\s+/g, "")}`;
+
+  renderSkeletons() {
+    return Array(6).fill('<div class="skeleton-card"></div>').join("");
+  }
+
+  async render(library) {
+    if (this.isFavSection && this.movieTitles.length === 0) return;
+    const rowId = `row-${this.title.replace(/\s+/g, "")}`;
     const html = `
-            <section class="section-row">
+            <section class="section-row" id="section-${rowId}">
                 <h2>${this.title}</h2>
-                <button class="nav-btn left" onclick="document.getElementById('${id}').scrollBy({left:-500,behavior:'smooth'})">‹</button>
-                <div class="row-container" id="${id}">${Array(6).fill('<div class="skeleton-card"></div>').join("")}</div>
-                <button class="nav-btn right" onclick="document.getElementById('${id}').scrollBy({left:500,behavior:'smooth'})">›</button>
-            </section>`;
+                <button class="nav-btn left" id="btn-l-${rowId}">‹</button>
+                <div class="row-container" id="${rowId}">${this.renderSkeletons()}</div>
+                <button class="nav-btn right" id="btn-r-${rowId}">›</button>
+            </section>
+        `;
     document
       .getElementById("movieSections")
-      .insertAdjacentHTML(this.isFav ? "afterbegin" : "beforeend", html);
-    const objs = await Promise.all(this.titles.map((t) => app.fetchData(t)));
-    document.getElementById(id).innerHTML = objs
-      .map((o) => (o ? o.render() : ""))
-      .join("");
+      .insertAdjacentHTML(this.isFavSection ? "afterbegin" : "beforeend", html);
+
+    const container = document.getElementById(rowId);
+    document.getElementById(`btn-l-${rowId}`).onclick = () =>
+      container.scrollBy({ left: -500, behavior: "smooth" });
+    document.getElementById(`btn-r-${rowId}`).onclick = () =>
+      container.scrollBy({ left: 500, behavior: "smooth" });
+
+    const moviePromises = this.movieTitles.map((t) => library.fetchData(t));
+    const movieObjects = await Promise.all(moviePromises);
+
+    container.innerHTML = "";
+    movieObjects.forEach((obj) => {
+      if (obj) container.innerHTML += obj.render();
+    });
   }
 }
 
 class MovieApp {
-  async fetchData(t) {
-    const res = await fetch(`/api/fetchMovie?title=${encodeURIComponent(t)}`);
-    const d = await res.json();
-    if (d.Response === "True") {
-      if (d.Genre.includes("Action")) return new ActionMovie(d);
-      if (d.Genre.includes("Sci-Fi")) return new SciFiMovie(d);
-      return new Movie(d);
+  constructor() {
+    this.init();
+  }
+  async fetchData(title) {
+    try {
+      const url = `/api/fetchMovie?title=${encodeURIComponent(title)}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.Response === "True") {
+        if (data.Genre.includes("Action")) return new ActionMovie(data);
+        if (data.Genre.includes("Sci-Fi")) return new SciFiMovie(data);
+        return new Movie(data);
+      }
+    } catch (err) {
+      console.error(err);
     }
+    return null;
   }
-  toggleFav(t) {
-    let l = JSON.parse(localStorage.getItem("myList")) || [];
-    l.includes(t) ? (l = l.filter((i) => i !== t)) : l.push(t);
-    localStorage.setItem("myList", JSON.stringify(l));
-    this.load();
-  }
-  load() {
+  toggleFav(title) {
+    let list = JSON.parse(localStorage.getItem("myList")) || [];
+    list.includes(title)
+      ? (list = list.filter((t) => t !== title))
+      : list.push(title);
+    localStorage.setItem("myList", JSON.stringify(list));
     document.getElementById("movieSections").innerHTML = "";
+    this.loadContent();
+  }
+  loadContent() {
     const favs = JSON.parse(localStorage.getItem("myList")) || [];
-    [
+    const categories = [
       new CategorySection("My List", favs, true),
-      new CategorySection("Hits", [
+      new CategorySection("Blockbusters", [
         "Dune: Part Two",
         "Deadpool & Wolverine",
         "Oppenheimer",
         "Gladiator II",
         "Furiosa",
+        "Kingdom of the Planet of the Apes",
       ]),
-      new CategorySection("Action", [
+      new CategorySection("High-Octane Action", [
         "John Wick: Chapter 4",
+        "Mission: Impossible - Dead Reckoning",
         "The Fall Guy",
+        "Monkey Man",
         "Top Gun: Maverick",
       ]),
-      new CategorySection("Sci-Fi", [
+      new CategorySection("Mind-Bending Sci-Fi", [
         "Interstellar",
+        "Everything Everywhere All at Once",
         "Arrival",
         "Tenet",
+        "The Creator",
         "Blade Runner 2049",
       ]),
-    ].forEach((c) => c.render(this));
+    ];
+    categories.forEach((cat) => cat.render(this));
   }
   init() {
-    document.getElementById("themeCheckbox").onchange = (e) =>
+    document.getElementById("themeCheckbox").addEventListener("change", (e) => {
       document.documentElement.setAttribute(
         "data-theme",
         e.target.checked ? "dark" : "light",
       );
-    document.getElementById("searchBtn").onclick = () => {
-      const q = document.getElementById("movieInput").value;
-      if (q) {
-        document.getElementById("movieSections").innerHTML = "";
-        new CategorySection("Results", [q]).render(this);
-      }
+    });
+    document.getElementById("searchBtn").onclick = async () => {
+      const query = document.getElementById("movieInput").value.trim();
+      if (!query) return;
+      document.getElementById("movieSections").innerHTML =
+        `<div style="padding: 20px 5%;"><button onclick="location.reload()" class="back-btn">← Back</button></div>`;
+      await new CategorySection("Search Results", [query]).render(this);
     };
-    this.load();
+    this.loadContent();
   }
 }
+
+class Modal {
+    static open(movie) {
+        const trailerUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(movie.title + ' official trailer')}`;
+        
+        const html = `
+            <div class="modal-overlay" id="modalOverlay" onclick="Modal.close()">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <button class="close-modal" onclick="Modal.close()">✕</button>
+                    <div class="video-container">
+                        <iframe src="${trailerUrl}" allowfullscreen></iframe>
+                    </div>
+                    <div class="details-pane">
+                        <h2>${movie.title}</h2>
+                        <div class="stats">⭐ IMDB: ${movie.imdb} | ${movie.year} | ${movie.genre}</div>
+                        <p>${movie.plot}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', html);
+        setTimeout(() => document.getElementById('modalOverlay').classList.add('active'), 10);
+        
+       
+        document.onkeydown = (e) => { if (e.key === "Escape") Modal.close(); };
+    }
+
+    static close() {
+        const modal = document.getElementById('modalOverlay');
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    }
+}
+
+
 const cineLib = new MovieApp();

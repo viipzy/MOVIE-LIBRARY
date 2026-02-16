@@ -95,11 +95,11 @@ class CategorySection {
     document.getElementById(`btn-r-${rowId}`).onclick = () =>
       container.scrollBy({ left: 500, behavior: "smooth" });
 
-    // Fetch and map to OOP Objects
+
     const moviePromises = this.movieTitles.map((t) => library.fetchData(t));
     const movieObjects = await Promise.all(moviePromises);
 
-    container.innerHTML = ""; // Clear loader
+    container.innerHTML = ""; 
     movieObjects.forEach((obj) => {
       if (obj) container.innerHTML += obj.render();
     });
@@ -195,5 +195,5 @@ class MovieApp {
 }
 
 
-const MY_API_KEY = "398a29f2";
+const MY_API_KEY = "";
 const cineLib = new MovieApp(MY_API_KEY);

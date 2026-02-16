@@ -253,8 +253,9 @@ a {
 .movie-card.action {
   border: 2px solid var(--accent);
 }
-.movie-card.comedy {
-  border: 2px solid #ffcc00;
+.movie-card.sci-fi {
+  border: 2px solid #00f2ff;
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
 }
 
 .fab-container {

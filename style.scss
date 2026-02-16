@@ -242,11 +242,15 @@ a{
     .info { opacity: 1; }
   }
 
+  
+    &.action { 
+        border: 2px solid var(--accent); 
+    } 
 
-  &.action { border: 2px solid var(--accent); }
-  &.comedy { border: 2px solid #ffcc00; }
-}
-
+    &.sci-fi { 
+        border: 2px solid #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); 
+    } 
+  }
 
 .fab-container {
   position: fixed;

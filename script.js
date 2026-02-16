@@ -1,5 +1,3 @@
-
-
 class Movie {
   #userRatings = [];
 
@@ -50,12 +48,12 @@ class ActionMovie extends Movie {
   }
 }
 
-class ComedyMovie extends Movie {
+class SciFiMovie extends Movie {
   render() {
     return super
       .render()
-      .replace("movie-card", "movie-card comedy")
-      .replace("</h3>", " <small>😂</small></h3>");
+      .replace("movie-card", "movie-card sci-fi")
+      .replace("</h3>", " <small>🚀</small></h3>");
   }
 }
 
@@ -72,7 +70,7 @@ class CategorySection {
                 <h2>${this.title}</h2>
                 <button class="nav-btn left" id="btn-l-${rowId}">‹</button>
                 <div class="row-container" id="${rowId}">
-                    <div class="loader">✨ Loading...</div>
+                    <div class="loader">✨ Loading Library...</div>
                 </div>
                 <button class="nav-btn right" id="btn-r-${rowId}">›</button>
             </section>
@@ -111,7 +109,7 @@ class MovieApp {
 
       if (data.Response === "True") {
         if (data.Genre.includes("Action")) return new ActionMovie(data);
-        if (data.Genre.includes("Comedy")) return new ComedyMovie(data);
+        if (data.Genre.includes("Sci-Fi")) return new SciFiMovie(data);
         return new Movie(data);
       }
     } catch (err) {
@@ -136,10 +134,10 @@ class MovieApp {
 
       document.getElementById("movieSections").innerHTML = `
                 <div style="padding: 20px 5%;">
-                    <button onclick="location.reload()" style="background:none; border:1px solid var(--accent); color:var(--accent); padding:10px 20px; border-radius:30px; cursor:pointer;">← Back to Library</button>
+                    <button onclick="location.reload()" style="background:none; border:1px solid var(--accent); color:var(--accent); padding:10px 20px; border-radius:30px; cursor:pointer;">← Back to Home</button>
                 </div>
             `;
-      const searchRow = new CategorySection("Search Result", [query]);
+      const searchRow = new CategorySection("Search Results", [query]);
       await searchRow.render(this);
     };
 
@@ -149,30 +147,33 @@ class MovieApp {
     };
 
     const categories = [
-      new CategorySection("Trending Blockbusters", [
-        "Inception",
-        "The Dark Knight",
-        "Dune",
-        "Interstellar",
-        "The Matrix",
-        "Avatar",
-        "Tenet",
+      new CategorySection("2024/25 Blockbusters", [
+        "Dune: Part Two",
+        "Deadpool & Wolverine",
+        "Oppenheimer",
+        "Gladiator II",
+        "Furiosa: A Mad Max Saga",
+        "Kingdom of the Planet of the Apes",
+        "The Batman Part II",
       ]),
-      new CategorySection("Action Adrenaline", [
-        "John Wick",
-        "Gladiator",
-        "Mad Max: Fury Road",
-        "Die Hard",
+      new CategorySection("High-Octane Action", [
+        "John Wick: Chapter 4",
+        "Mission: Impossible - Dead Reckoning",
+        "The Fall Guy",
+        "Monkey Man",
         "Top Gun: Maverick",
-        "Extraction",
+        "Extraction 2",
+        "The Beekeeper",
       ]),
-      new CategorySection("Comedy Gold", [
-        "Superbad",
-        "The Hangover",
-        "Deadpool",
-        "Free Guy",
-        "Step Brothers",
-        "21 Jump Street",
+      new CategorySection("Mind-Bending Sci-Fi", [
+        "Interstellar",
+        "Everything Everywhere All at Once",
+        "Arrival",
+        "Tenet",
+        "The Creator",
+        "Blade Runner 2049",
+        "Poor Things",
+        "Alien: Romulus",
       ]),
     ];
 

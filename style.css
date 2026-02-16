@@ -291,6 +291,39 @@ a {
   font-size: 1.2rem;
 }
 
+.movie-card .favorite-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+.movie-card .favorite-btn:hover {
+  transform: scale(1.2);
+  background: var(--accent);
+}
+.movie-card .favorite-btn.active {
+  color: var(--accent);
+  background: white;
+}
+
+.empty-list-msg {
+  padding: 20px 5%;
+  opacity: 0.6;
+  font-style: italic;
+}
+
 .app-footer {
   text-align: center;
   padding: 50px;

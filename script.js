@@ -147,7 +147,7 @@ class MovieApp {
     };
 
     const categories = [
-      new CategorySection("2024/25 Blockbusters", [
+      new CategorySection("Blockbusters", [
         "Dune: Part Two",
         "Deadpool & Wolverine",
         "Oppenheimer",

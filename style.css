@@ -257,6 +257,12 @@ a {
   border: 2px solid #00f2ff;
   box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
 }
+.movie-card .movie-card.action:hover {
+  box-shadow: 0 0 30px rgba(229, 9, 20, 0.6);
+}
+.movie-card .movie-card.sci-fi:hover {
+  box-shadow: 0 0 30px rgba(0, 242, 255, 0.6);
+}
 
 .fab-container {
   position: fixed;
